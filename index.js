@@ -95,7 +95,6 @@ function optionalComponentPropsHaveDefaultProperty(context, node) {
       if (propProperties.includes("propDefinition")) continue;
 
       const optionalValue = propDef.properties.find((p) => p?.key?.name === "optional")?.value?.value;
-      console.log(optionalValue);
 
       if (propProperties.includes("optional") && optionalValue && !propProperties.includes("default")) {
         context.report({
