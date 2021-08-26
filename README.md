@@ -1,4 +1,4 @@
-# `eslint-plugin-pipedream`
+# eslint-plugin-pipedream
 
 This ESLint plugin implements rules that validate the [Pipedream component guidelines](https://pipedream.com/docs/components/guidelines/#guidelines-patterns). Only a subset of the guidelines are mapped to rules: those that can be statically-analyzed.
 
