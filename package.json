@@ -1,13 +1,26 @@
 {
   "name": "eslint-plugin-pipedream",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "ESLint plugin for Pipedream components: https://pipedream.com/docs/components/api/",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["pipedream", "node.js", "integration", "api", "apis"],
+  "keywords": [
+    "pipedream",
+    "node.js",
+    "integration",
+    "api",
+    "apis"
+  ],
   "author": "Pipedream, Inc",
   "license": "MIT",
-  "homepage": "https://github.com/PipedreamHQ/eslint-plugin-pipedream"
+  "homepage": "https://github.com/PipedreamHQ/eslint-plugin-pipedream",
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-plugin-jsonc": "^1.6.0",
+    "eslint-plugin-putout": "^9.2.1",
+    "jest": "^27.0.6",
+    "putout": "^19.0.2"
+  }
 }

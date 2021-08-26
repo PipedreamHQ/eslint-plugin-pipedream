@@ -16,6 +16,25 @@ function isObjectWithProperties(node) {
   return true;
 }
 
+// Objects can contain key names surrounded by quotes, or not
+// propertyArray is the array of Property nodes in the component object
+function astIncludesProperty(name, propertyArray) {
+  // value for Literals (quotes), name for Identifiers (no quotes)
+  const propertyNames = propertyArray.map((p) => p?.key?.value ?? p?.key?.name);
+  return propertyNames.includes(name) || propertyNames.includes(`"${name}"`);
+}
+
+// Returns the Property node matching the given name
+// propertyArray is the array of Property nodes in the component object
+function findPropertyWithName(name, propertyArray) {
+  return propertyArray.find((p) => {
+    return p?.key?.name === name ||
+      p?.key?.name === `"${name}"` ||
+      p?.key?.value === name ||
+      p?.key?.value === `"${name}"`;
+  });
+}
+
 // Does a component contain the right property? e.g. key, version
 function componentContainsPropertyCheck(context, node, propertyName, message) {
   const {
@@ -25,12 +44,22 @@ function componentContainsPropertyCheck(context, node, propertyName, message) {
   if (!isModuleExports(left)) return;
   if (!isObjectWithProperties(right)) return;
 
-  if (!right.properties.map((p) => p?.key?.name).includes(propertyName)) {
+  if (!astIncludesProperty(propertyName, right.properties)) {
     context.report({
       node: node,
       message: message ?? `Components must export a ${propertyName} property. See https://pipedream.com/docs/components/guidelines/#required-metadata`,
     });
   }
+}
+
+// Extract props or propDefintions from the object properties of the module
+function getProps(moduleProperties) {
+  return moduleProperties.find((p) => {
+    return p?.key?.name === "props" ||
+      p?.key?.value === "props" ||
+      p?.key?.name === "propDefinitions" ||
+      p?.key?.value === "propDefinitions";
+  });
 }
 
 // Do component props contain the right properties? e.g. label, description
@@ -43,28 +72,23 @@ function componentPropsContainsPropertyCheck(context, node, propertyName) {
   if (!isObjectWithProperties(right)) return;
 
   const { properties } = right;
-  const propertyNames = properties.map((p) => p?.key?.name);
-  if (propertyNames.includes("props") || propertyNames.includes("propDefinitions")) {
-    const props = properties.find((p) => p?.key?.name === "props" || p?.key?.name === "propDefinitions");
-    if (!isObjectWithProperties(props?.value)) return;
-    for (const prop of props.value?.properties) {
-      const {
-        key,
-        value: propDef,
-      } = prop;
+  if (!(astIncludesProperty("props", properties) || astIncludesProperty("propDefinitions", properties))) return;
+  const props = getProps(properties);
+  if (!isObjectWithProperties(props?.value)) return;
+  for (const prop of props.value?.properties) {
+    const {
+      key,
+      value: propDef,
+    } = prop;
 
-      // We don't want to lint app props or props that are defined in propDefinitions
-      if (!isObjectWithProperties(propDef)) continue;
-      if (!isObjectWithProperties(right)) continue;
-      const propProperties = propDef.properties.map((p) => p?.key?.name);
-      if (propProperties.includes("propDefinition")) continue;
-
-      if (!propProperties.includes(propertyName)) {
-        context.report({
-          node: prop,
-          message: `Component prop ${key?.name} must have a ${propertyName}. See https://pipedream.com/docs/components/guidelines/#props`,
-        });
-      }
+    // We don't want to lint app props or props that are defined in propDefinitions
+    if (!isObjectWithProperties(propDef)) continue;
+    if (astIncludesProperty("propDefinition", propDef.properties)) continue;
+    if (!astIncludesProperty(propertyName, propDef.properties)) {
+      context.report({
+        node: prop,
+        message: `Component prop ${key?.name ?? key?.value} must have a ${propertyName}. See https://pipedream.com/docs/components/guidelines/#props`,
+      });
     }
   }
 }
@@ -78,31 +102,72 @@ function optionalComponentPropsHaveDefaultProperty(context, node) {
   if (!isObjectWithProperties(right)) return;
 
   const { properties } = right;
-  const propertyNames = properties.map((p) => p?.key?.name);
-  if (propertyNames.includes("props") || propertyNames.includes("propDefinitions")) {
-    const props = properties.find((p) => p?.key?.name === "props" || p?.key?.name === "propDefinitions");
-    if (!isObjectWithProperties(props?.value)) return;
-    for (const prop of props.value?.properties) {
-      const {
-        key,
-        value: propDef,
-      } = prop;
+  if (!(astIncludesProperty("props", properties) || astIncludesProperty("propDefinitions", properties))) return;
+  const props = getProps(properties);
+  if (!isObjectWithProperties(props?.value)) return;
+  for (const prop of props.value?.properties) {
+    const {
+      key,
+      value: propDef,
+    } = prop;
 
-      // We don't want to lint app props or props that are defined in propDefinitions
-      if (!isObjectWithProperties(propDef)) continue;
-      if (!isObjectWithProperties(right)) continue;
-      const propProperties = propDef.properties.map((p) => p?.key?.name);
-      if (propProperties.includes("propDefinition")) continue;
+    // We don't want to lint app props or props that are defined in propDefinitions
+    if (!isObjectWithProperties(propDef)) continue;
+    if (!isObjectWithProperties(right)) continue;
+    if (astIncludesProperty("propDefinition", right.properties)) continue;
 
-      const optionalValue = propDef.properties.find((p) => p?.key?.name === "optional")?.value?.value;
+    // value for Literals (quotes), name for Identifiers (no quotes)
+    const optionalProp = findPropertyWithName("optional", propDef.properties);
+    const optionalValue = optionalProp?.value?.value;
 
-      if (propProperties.includes("optional") && optionalValue && !propProperties.includes("default")) {
-        context.report({
-          node: prop,
-          message: `Component prop ${key?.name} is marked "optional", so it must have a "default" property. See https://pipedream.com/docs/components/guidelines/#default-values`,
-        });
-      }
+    if (astIncludesProperty("optional", propDef.properties) && optionalValue && !astIncludesProperty("default", propDef.properties)) {
+      context.report({
+        node: prop,
+        message: `Component prop ${key?.name ?? key?.value} is marked "optional", so it may need a "default" property. See https://pipedream.com/docs/components/guidelines/#default-values`,
+      });
     }
+  }
+}
+
+// Checks to confirm the component is a source, and returns
+// the node with the name specified by the user
+function checkComponentIsSourceAndReturnTargetProp(node, propertyName) {
+  const {
+    left,
+    right,
+  } = node.expression;
+
+  if (!isModuleExports(left)) return;
+  if (!isObjectWithProperties(right)) return;
+
+  const typeProp = findPropertyWithName("type", right.properties);
+  // A separate rule checks the presence of the type property
+  if (!typeProp) return;
+  if (typeProp?.value?.value !== "source") return;
+
+  return findPropertyWithName(propertyName, right.properties);
+}
+
+function componentSourceNameCheck(context, node) {
+  const nameProp = checkComponentIsSourceAndReturnTargetProp(node, "name");
+  console.log("Name prop: ", nameProp);
+  if (!nameProp) return;
+  if (!nameProp?.value?.value.startsWith("New ")) {
+    context.report({
+      node: nameProp,
+      message: "Source names should start with \"New\". See https://pipedream.com/docs/components/guidelines/#source-name",
+    });
+  }
+}
+
+function componentSourceDescriptionCheck(context, node) {
+  const nameProp = checkComponentIsSourceAndReturnTargetProp(node, "description");
+  if (!nameProp) return;
+  if (!nameProp?.value?.value.startsWith("Emit new ")) {
+    context.report({
+      node: nameProp,
+      message: "Source descriptions should start with \"Emit new\". See https://pipedream.com/docs/components/guidelines/#source-description",
+    });
   }
 }
 
@@ -184,7 +249,7 @@ module.exports = {
       create: function (context) {
         return {
           ExpressionStatement(node) {
-            componentContainsPropertyCheck(context, node, "type", "Components must export a type property (\"source\" or \"action\")");
+            componentSourceNameCheck(context, node);
           },
         };
       },
@@ -193,7 +258,7 @@ module.exports = {
       create: function (context) {
         return {
           ExpressionStatement(node) {
-            componentContainsPropertyCheck(context, node, "type", "Components must export a type property (\"source\" or \"action\")");
+            componentSourceDescriptionCheck(context, node);
           },
         };
       },
