@@ -4,7 +4,7 @@ This ESLint plugin implements rules that validate the [Pipedream component guide
 
 For example, all components should have a `name`:
 
-<img src="./images/component-must-have-name.png" width=400 alt="Component must have name error" />
+<img src="./images/component-must-have-name.png" width=500 alt="Component must have name error" />
 
 Learn more about Pipedream at [https://pipedream.com/docs](https://pipedream.com/docs), and read more about Pipedream components in [the component API docs](https://pipedream.com/docs/components/api/).
 
