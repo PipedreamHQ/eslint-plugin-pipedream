@@ -150,7 +150,6 @@ function checkComponentIsSourceAndReturnTargetProp(node, propertyName) {
 
 function componentSourceNameCheck(context, node) {
   const nameProp = checkComponentIsSourceAndReturnTargetProp(node, "name");
-  console.log("Name prop: ", nameProp);
   if (!nameProp) return;
   if (!nameProp?.value?.value.startsWith("New ")) {
     context.report({
