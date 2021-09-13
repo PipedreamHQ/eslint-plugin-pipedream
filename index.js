@@ -161,8 +161,8 @@ function componentSourceNameCheck(context, node) {
 
 function componentSourceDescriptionCheck(context, node) {
   const nameProp = checkComponentIsSourceAndReturnTargetProp(node, "description");
-  if (!nameProp) return;
-  if (!nameProp?.value?.value.startsWith("Emit new ")) {
+  if (!nameProp || typeof nameProp?.value?.value !== 'string') return;
+  if (!nameProp.value.value.startsWith("Emit new ")) {
     context.report({
       node: nameProp,
       message: "Source descriptions should start with \"Emit new\". See https://pipedream.com/docs/components/guidelines/#source-description",
