@@ -5,6 +5,13 @@ function isModuleExports(node) {
   return true;
 }
 
+function isDefaultExport(node) {
+  if (!node) return false;
+  if (node.type !== "Program" || !node.body || !node.body.length) return false;
+  if (node?.body[0]?.type !== "ExportDefaultDeclaration") return false;
+  return true;
+}
+
 function isObjectWithProperties(node) {
   if (!node) return false;
   const {
@@ -20,8 +27,11 @@ function isObjectWithProperties(node) {
 // propertyArray is the array of Property nodes in the component object
 function astIncludesProperty(name, propertyArray) {
   // value for Literals (quotes), name for Identifiers (no quotes)
-  const propertyNames = propertyArray.map((p) => p?.key?.value ?? p?.key?.name);
-  return propertyNames.includes(name) || propertyNames.includes(`"${name}"`);
+  const propertyNames = propertyArray.map((p) => {
+    return p?.key?.value ?? p?.key?.name;
+  });
+  const val = propertyNames.includes(name) || propertyNames.includes(`"${name}"`);
+  return val;
 }
 
 // Returns the Property node matching the given name
@@ -37,14 +47,23 @@ function findPropertyWithName(name, propertyArray) {
 
 // Does a component contain the right property? e.g. key, version
 function componentContainsPropertyCheck(context, node, propertyName, message) {
-  const {
-    left,
-    right,
-  } = node.expression;
-  if (!isModuleExports(left)) return;
-  if (!isObjectWithProperties(right)) return;
+  let component;
+  if (isDefaultExport(node)) {
+    component = node?.body[0]?.declaration;
+  }
 
-  if (!astIncludesProperty(propertyName, right.properties)) {
+  if (node.expression) {
+    const {
+      left,
+      right,
+    } = node.expression;
+    if (isModuleExports(left) && isObjectWithProperties(right)) {
+      component = right;
+    }
+  }
+
+  if (!component) return;
+  if (!astIncludesProperty(propertyName, component.properties)) {
     context.report({
       node: node,
       message: message ?? `Components must export a ${propertyName} property. See https://pipedream.com/docs/components/guidelines/#required-metadata`,
@@ -64,14 +83,24 @@ function getProps(moduleProperties) {
 
 // Do component props contain the right properties? e.g. label, description
 function componentPropsContainsPropertyCheck(context, node, propertyName) {
-  const {
-    left,
-    right,
-  } = node.expression;
-  if (!isModuleExports(left)) return;
-  if (!isObjectWithProperties(right)) return;
+  let component;
+  if (isDefaultExport(node)) {
+    component = node?.body[0]?.declaration;
+  }
 
-  const { properties } = right;
+  if (node.expression) {
+    const {
+      left,
+      right,
+    } = node.expression;
+    if (isModuleExports(left) && isObjectWithProperties(right)) {
+      component = right;
+    }
+  }
+
+  if (!component) return;
+
+  const { properties } = component;
   if (!(astIncludesProperty("props", properties) || astIncludesProperty("propDefinitions", properties))) return;
   const props = getProps(properties);
   if (!isObjectWithProperties(props?.value)) return;
@@ -94,14 +123,23 @@ function componentPropsContainsPropertyCheck(context, node, propertyName) {
 }
 
 function optionalComponentPropsHaveDefaultProperty(context, node) {
-  const {
-    left,
-    right,
-  } = node.expression;
-  if (!isModuleExports(left)) return;
-  if (!isObjectWithProperties(right)) return;
+  let component;
+  if (isDefaultExport(node)) {
+    component = node?.body[0]?.declaration;
+  }
 
-  const { properties } = right;
+  if (node.expression) {
+    const {
+      left,
+      right,
+    } = node.expression;
+    if (isModuleExports(left) && isObjectWithProperties(right)) {
+      component = right;
+    }
+  }
+
+  if (!component) return;
+  const { properties } = component;
   if (!(astIncludesProperty("props", properties) || astIncludesProperty("propDefinitions", properties))) return;
   const props = getProps(properties);
   if (!isObjectWithProperties(props?.value)) return;
@@ -113,8 +151,8 @@ function optionalComponentPropsHaveDefaultProperty(context, node) {
 
     // We don't want to lint app props or props that are defined in propDefinitions
     if (!isObjectWithProperties(propDef)) continue;
-    if (!isObjectWithProperties(right)) continue;
-    if (astIncludesProperty("propDefinition", right.properties)) continue;
+    if (!isObjectWithProperties(component)) continue;
+    if (astIncludesProperty("propDefinition", component.properties)) continue;
 
     // value for Literals (quotes), name for Identifiers (no quotes)
     const optionalProp = findPropertyWithName("optional", propDef.properties);
@@ -132,20 +170,30 @@ function optionalComponentPropsHaveDefaultProperty(context, node) {
 // Checks to confirm the component is a source, and returns
 // the node with the name specified by the user
 function checkComponentIsSourceAndReturnTargetProp(node, propertyName) {
-  const {
-    left,
-    right,
-  } = node.expression;
+  let component;
+  if (isDefaultExport(node)) {
+    component = node?.body[0]?.declaration;
+  }
 
-  if (!isModuleExports(left)) return;
-  if (!isObjectWithProperties(right)) return;
+  if (node.expression) {
+    const {
+      left,
+      right,
+    } = node.expression;
+    if (isModuleExports(left) && isObjectWithProperties(right)) {
+      component = right;
+    }
+  }
 
-  const typeProp = findPropertyWithName("type", right.properties);
+  if (!component) return;
+  const { properties } = component;
+
+  const typeProp = findPropertyWithName("type", properties);
   // A separate rule checks the presence of the type property
   if (!typeProp) return;
   if (typeProp?.value?.value !== "source") return;
 
-  return findPropertyWithName(propertyName, right.properties);
+  return findPropertyWithName(propertyName, properties);
 }
 
 function componentSourceNameCheck(context, node) {
@@ -161,7 +209,7 @@ function componentSourceNameCheck(context, node) {
 
 function componentSourceDescriptionCheck(context, node) {
   const nameProp = checkComponentIsSourceAndReturnTargetProp(node, "description");
-  if (!nameProp || typeof nameProp?.value?.value !== 'string') return;
+  if (!nameProp || typeof nameProp?.value?.value !== "string") return;
   if (!nameProp.value.value.startsWith("Emit new ")) {
     context.report({
       node: nameProp,
@@ -170,12 +218,16 @@ function componentSourceDescriptionCheck(context, node) {
   }
 }
 
+// Rules run on two different AST node types: ExpressionStatement (CJS) and Program (ESM)
 module.exports = {
   rules: {
     "required-properties-key": {
       create: function (context) {
         return {
           ExpressionStatement(node) {
+            componentContainsPropertyCheck(context, node, "key");
+          },
+          Program(node) {
             componentContainsPropertyCheck(context, node, "key");
           },
         };
@@ -187,6 +239,9 @@ module.exports = {
           ExpressionStatement(node) {
             componentContainsPropertyCheck(context, node, "name");
           },
+          Program(node) {
+            componentContainsPropertyCheck(context, node, "name");
+          },
         };
       },
     },
@@ -194,6 +249,9 @@ module.exports = {
       create: function (context) {
         return {
           ExpressionStatement(node) {
+            componentContainsPropertyCheck(context, node, "version");
+          },
+          Program(node) {
             componentContainsPropertyCheck(context, node, "version");
           },
         };
@@ -205,6 +263,9 @@ module.exports = {
           ExpressionStatement(node) {
             componentContainsPropertyCheck(context, node, "description");
           },
+          Program(node) {
+            componentContainsPropertyCheck(context, node, "description");
+          },
         };
       },
     },
@@ -212,6 +273,9 @@ module.exports = {
       create: function (context) {
         return {
           ExpressionStatement(node) {
+            componentContainsPropertyCheck(context, node, "type", "Components must export a type property (\"source\" or \"action\")");
+          },
+          Program(node) {
             componentContainsPropertyCheck(context, node, "type", "Components must export a type property (\"source\" or \"action\")");
           },
         };
@@ -223,6 +287,9 @@ module.exports = {
           ExpressionStatement(node) {
             componentPropsContainsPropertyCheck(context, node, "label");
           },
+          Program(node) {
+            componentPropsContainsPropertyCheck(context, node, "label");
+          },
         };
       },
     },
@@ -230,6 +297,9 @@ module.exports = {
       create: function (context) {
         return {
           ExpressionStatement(node) {
+            componentPropsContainsPropertyCheck(context, node, "description");
+          },
+          Program(node) {
             componentPropsContainsPropertyCheck(context, node, "description");
           },
         };
@@ -241,6 +311,9 @@ module.exports = {
           ExpressionStatement(node) {
             optionalComponentPropsHaveDefaultProperty(context, node);
           },
+          Program(node) {
+            optionalComponentPropsHaveDefaultProperty(context, node);
+          },
         };
       },
     },
@@ -250,6 +323,9 @@ module.exports = {
           ExpressionStatement(node) {
             componentSourceNameCheck(context, node);
           },
+          Program(node) {
+            componentSourceNameCheck(context, node);
+          },
         };
       },
     },
@@ -257,6 +333,9 @@ module.exports = {
       create: function (context) {
         return {
           ExpressionStatement(node) {
+            componentSourceDescriptionCheck(context, node);
+          },
+          Program(node) {
             componentSourceDescriptionCheck(context, node);
           },
         };

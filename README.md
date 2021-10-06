@@ -26,3 +26,24 @@ Then add the Pipedream plugin to the `plugins` section of your [ESLint config fi
 ],
 ```
 
+## Developing the plugin
+
+When you're contributing to this plugin, first install dependencies:
+
+```bash
+npm i
+```
+
+You can run tests with:
+
+```bash
+npm run test
+```
+
+All rules are exported from `index.js`. Tests can be found in the `tests` directory. Each new rule should have associated tests.
+
+If this is your first time creating ESLint rules, see these helpful resouces:
+
+* [ESLint Developer Guide](https://eslint.org/docs/developer-guide/)
+* [AST Explorer](https://astexplorer.net/). Useful for examining the AST of any code snippet.
+* [How To Write Your First ESLint Plugin](https://dev.to/spukas/how-to-write-your-first-eslint-plugin-145)
