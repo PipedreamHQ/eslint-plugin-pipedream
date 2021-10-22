@@ -12,6 +12,7 @@ const {
   missingPropsDescription,
   badSourceName,
   badSourceDescription,
+  tsVersion,
 } = require("./components");
 
 const ruleTester = new RuleTester({
@@ -314,6 +315,35 @@ ruleTester.run("source-description-test", rules["source-description"], {
       errors: [
         {
           message: "Source descriptions should start with \"Emit new\". See https://pipedream.com/docs/components/guidelines/#source-description",
+        },
+      ],
+    },
+  ],
+});
+
+ruleTester.run("ts-version-test", rules["no-ts-version"], {
+  valid: [
+    {
+      code: convertObjectToCJSExportString(valid),
+    },
+    {
+      code: convertObjectToESMExportString(valid),
+    },
+  ],
+  invalid: [
+    {
+      code: convertObjectToCJSExportString(tsVersion),
+      errors: [
+        {
+          message: "{{ts}} macro should be removed before committing",
+        },
+      ],
+    },
+    {
+      code: convertObjectToESMExportString(tsVersion),
+      errors: [
+        {
+          message: "{{ts}} macro should be removed before committing",
         },
       ],
     },

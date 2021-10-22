@@ -218,6 +218,17 @@ function componentSourceDescriptionCheck(context, node) {
   }
 }
 
+function componentVersionTsMacroCheck(context, node) {
+  const versionProp = checkComponentIsSourceAndReturnTargetProp(node, "version");
+  if (!versionProp) return;
+  if (versionProp?.value?.value.includes("{{ts}}")) {
+    context.report({
+      node: versionProp,
+      message: "{{ts}} macro should be removed before committing",
+    });
+  }
+}
+
 // Rules run on two different AST node types: ExpressionStatement (CJS) and Program (ESM)
 module.exports = {
   rules: {
@@ -337,6 +348,18 @@ module.exports = {
           },
           Program(node) {
             componentSourceDescriptionCheck(context, node);
+          },
+        };
+      },
+    },
+    "no-ts-version": {
+      create: function (context) {
+        return {
+          ExpressionStatement(node) {
+            componentVersionTsMacroCheck(context, node);
+          },
+          Program(node) {
+            componentVersionTsMacroCheck(context, node);
           },
         };
       },

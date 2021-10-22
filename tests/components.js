@@ -95,4 +95,11 @@ module.exports = {
     description: "foo",
     type: "source",
   },
+  tsVersion: {
+    key: "test",
+    name: "Test",
+    description: "foo",
+    type: "source",
+    version: "0.0.{{ts}}",
+  },
 };
