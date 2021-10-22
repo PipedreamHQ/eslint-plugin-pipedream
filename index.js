@@ -219,7 +219,25 @@ function componentSourceDescriptionCheck(context, node) {
 }
 
 function componentVersionTsMacroCheck(context, node) {
-  const versionProp = checkComponentIsSourceAndReturnTargetProp(node, "version");
+  let component;
+  if (isDefaultExport(node)) {
+    component = node?.body[0]?.declaration;
+  }
+
+  if (node.expression) {
+    const {
+      left,
+      right,
+    } = node.expression;
+    if (isModuleExports(left) && isObjectWithProperties(right)) {
+      component = right;
+    }
+  }
+
+  if (!component) return;
+  const { properties } = component;
+
+  const versionProp = findPropertyWithName("version", properties);
   if (!versionProp) return;
   if (versionProp?.value?.value.includes("{{ts}}")) {
     context.report({

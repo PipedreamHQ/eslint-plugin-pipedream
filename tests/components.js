@@ -99,7 +99,7 @@ module.exports = {
     key: "test",
     name: "Test",
     description: "foo",
-    type: "source",
+    type: "action",
     version: "0.0.{{ts}}",
   },
 };
