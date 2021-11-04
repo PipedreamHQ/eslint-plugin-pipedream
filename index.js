@@ -6,10 +6,7 @@ function isModuleExports(node) {
 }
 
 function isDefaultExport(node) {
-  if (!node) return false;
-  if (node.type !== "Program" || !node.body || !node.body.length) return false;
-  if (node?.body[0]?.type !== "ExportDefaultDeclaration") return false;
-  return true;
+  return node?.type === "ExportDefaultDeclaration"
 }
 
 function isObjectWithProperties(node) {
@@ -49,7 +46,7 @@ function findPropertyWithName(name, propertyArray) {
 function componentContainsPropertyCheck(context, node, propertyName, message) {
   let component;
   if (isDefaultExport(node)) {
-    component = node?.body[0]?.declaration;
+    component = node.declaration;
   }
 
   if (node.expression) {
@@ -85,9 +82,8 @@ function getProps(moduleProperties) {
 function componentPropsContainsPropertyCheck(context, node, propertyName) {
   let component;
   if (isDefaultExport(node)) {
-    component = node?.body[0]?.declaration;
+    component = node.declaration;
   }
-
   if (node.expression) {
     const {
       left,
@@ -125,7 +121,7 @@ function componentPropsContainsPropertyCheck(context, node, propertyName) {
 function optionalComponentPropsHaveDefaultProperty(context, node) {
   let component;
   if (isDefaultExport(node)) {
-    component = node?.body[0]?.declaration;
+    component = node.declaration;
   }
 
   if (node.expression) {
@@ -172,7 +168,7 @@ function optionalComponentPropsHaveDefaultProperty(context, node) {
 function checkComponentIsSourceAndReturnTargetProp(node, propertyName) {
   let component;
   if (isDefaultExport(node)) {
-    component = node?.body[0]?.declaration;
+    component = node.declaration;
   }
 
   if (node.expression) {
@@ -221,7 +217,7 @@ function componentSourceDescriptionCheck(context, node) {
 function componentVersionTsMacroCheck(context, node) {
   let component;
   if (isDefaultExport(node)) {
-    component = node?.body[0]?.declaration;
+    component = node.declaration;
   }
 
   if (node.expression) {
@@ -247,7 +243,7 @@ function componentVersionTsMacroCheck(context, node) {
   }
 }
 
-// Rules run on two different AST node types: ExpressionStatement (CJS) and Program (ESM)
+// Rules run on two different AST node types: ExpressionStatement (CJS) and ExportDefaultDeclaration (ESM)
 module.exports = {
   rules: {
     "required-properties-key": {
@@ -256,7 +252,7 @@ module.exports = {
           ExpressionStatement(node) {
             componentContainsPropertyCheck(context, node, "key");
           },
-          Program(node) {
+          ExportDefaultDeclaration(node) {
             componentContainsPropertyCheck(context, node, "key");
           },
         };
@@ -268,7 +264,7 @@ module.exports = {
           ExpressionStatement(node) {
             componentContainsPropertyCheck(context, node, "name");
           },
-          Program(node) {
+          ExportDefaultDeclaration(node) {
             componentContainsPropertyCheck(context, node, "name");
           },
         };
@@ -280,7 +276,7 @@ module.exports = {
           ExpressionStatement(node) {
             componentContainsPropertyCheck(context, node, "version");
           },
-          Program(node) {
+          ExportDefaultDeclaration(node) {
             componentContainsPropertyCheck(context, node, "version");
           },
         };
@@ -292,7 +288,7 @@ module.exports = {
           ExpressionStatement(node) {
             componentContainsPropertyCheck(context, node, "description");
           },
-          Program(node) {
+          ExportDefaultDeclaration(node) {
             componentContainsPropertyCheck(context, node, "description");
           },
         };
@@ -304,7 +300,7 @@ module.exports = {
           ExpressionStatement(node) {
             componentContainsPropertyCheck(context, node, "type", "Components must export a type property (\"source\" or \"action\")");
           },
-          Program(node) {
+          ExportDefaultDeclaration(node) {
             componentContainsPropertyCheck(context, node, "type", "Components must export a type property (\"source\" or \"action\")");
           },
         };
@@ -316,7 +312,7 @@ module.exports = {
           ExpressionStatement(node) {
             componentPropsContainsPropertyCheck(context, node, "label");
           },
-          Program(node) {
+          ExportDefaultDeclaration(node) {
             componentPropsContainsPropertyCheck(context, node, "label");
           },
         };
@@ -328,7 +324,7 @@ module.exports = {
           ExpressionStatement(node) {
             componentPropsContainsPropertyCheck(context, node, "description");
           },
-          Program(node) {
+          ExportDefaultDeclaration(node) {
             componentPropsContainsPropertyCheck(context, node, "description");
           },
         };
@@ -340,7 +336,7 @@ module.exports = {
           ExpressionStatement(node) {
             optionalComponentPropsHaveDefaultProperty(context, node);
           },
-          Program(node) {
+          ExportDefaultDeclaration(node) {
             optionalComponentPropsHaveDefaultProperty(context, node);
           },
         };
@@ -352,7 +348,7 @@ module.exports = {
           ExpressionStatement(node) {
             componentSourceNameCheck(context, node);
           },
-          Program(node) {
+          ExportDefaultDeclaration(node) {
             componentSourceNameCheck(context, node);
           },
         };
@@ -364,7 +360,7 @@ module.exports = {
           ExpressionStatement(node) {
             componentSourceDescriptionCheck(context, node);
           },
-          Program(node) {
+          ExportDefaultDeclaration(node) {
             componentSourceDescriptionCheck(context, node);
           },
         };
@@ -376,7 +372,7 @@ module.exports = {
           ExpressionStatement(node) {
             componentVersionTsMacroCheck(context, node);
           },
-          Program(node) {
+          ExportDefaultDeclaration(node) {
             componentVersionTsMacroCheck(context, node);
           },
         };
