@@ -6,7 +6,7 @@ function isModuleExports(node) {
 }
 
 function isDefaultExport(node) {
-  return node?.type === "ExportDefaultDeclaration"
+  return node?.type === "ExportDefaultDeclaration";
 }
 
 function isObjectWithProperties(node) {
