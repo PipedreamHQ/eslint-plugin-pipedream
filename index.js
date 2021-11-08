@@ -243,7 +243,8 @@ function componentVersionTsMacroCheck(context, node) {
   }
 }
 
-// Rules run on two different AST node types: ExpressionStatement (CJS) and ExportDefaultDeclaration (ESM)
+// Rules run on two different AST node types: ExpressionStatement (CJS) and
+// ExportDefaultDeclaration (ESM)
 module.exports = {
   rules: {
     "required-properties-key": {
