@@ -45,7 +45,7 @@ function findPropertyWithName(name, propertyArray) {
 // Does a component contain the right property? e.g. key, version
 function componentContainsPropertyCheck(context, node, propertyName, message) {
   let component;
-  if (isDefaultExport(node)) {
+  if (isDefaultExport(node) && isObjectWithProperties(node.declaration)) {
     component = node.declaration;
   }
 
@@ -81,7 +81,7 @@ function getProps(moduleProperties) {
 // Do component props contain the right properties? e.g. label, description
 function componentPropsContainsPropertyCheck(context, node, propertyName) {
   let component;
-  if (isDefaultExport(node)) {
+  if (isDefaultExport(node) && isObjectWithProperties(node.declaration)) {
     component = node.declaration;
   }
   if (node.expression) {
@@ -120,7 +120,7 @@ function componentPropsContainsPropertyCheck(context, node, propertyName) {
 
 function optionalComponentPropsHaveDefaultProperty(context, node) {
   let component;
-  if (isDefaultExport(node)) {
+  if (isDefaultExport(node) && isObjectWithProperties(node.declaration)) {
     component = node.declaration;
   }
 
@@ -167,7 +167,7 @@ function optionalComponentPropsHaveDefaultProperty(context, node) {
 // the node with the name specified by the user
 function checkComponentIsSourceAndReturnTargetProp(node, propertyName) {
   let component;
-  if (isDefaultExport(node)) {
+  if (isDefaultExport(node) && isObjectWithProperties(node.declaration)) {
     component = node.declaration;
   }
 
@@ -216,7 +216,7 @@ function componentSourceDescriptionCheck(context, node) {
 
 function componentVersionTsMacroCheck(context, node) {
   let component;
-  if (isDefaultExport(node)) {
+  if (isDefaultExport(node) && isObjectWithProperties(node.declaration)) {
     component = node.declaration;
   }
 
