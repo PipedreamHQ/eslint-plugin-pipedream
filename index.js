@@ -20,6 +20,24 @@ function isObjectWithProperties(node) {
   return true;
 }
 
+function getComponentFromNode(node) {
+  if (isDefaultExport(node) && isObjectWithProperties(node.declaration)) {
+    return node.declaration;
+  }
+
+  if (node.expression) {
+    const {
+      left,
+      right,
+    } = node.expression;
+    if (isModuleExports(left) && isObjectWithProperties(right)) {
+      return right;
+    }
+  }
+
+  return null;
+}
+
 // Objects can contain key names surrounded by quotes, or not
 // propertyArray is the array of Property nodes in the component object
 function astIncludesProperty(name, propertyArray) {
@@ -44,20 +62,7 @@ function findPropertyWithName(name, propertyArray) {
 
 // Does a component contain the right property? e.g. key, version
 function componentContainsPropertyCheck(context, node, propertyName, message) {
-  let component;
-  if (isDefaultExport(node) && isObjectWithProperties(node.declaration)) {
-    component = node.declaration;
-  }
-
-  if (node.expression) {
-    const {
-      left,
-      right,
-    } = node.expression;
-    if (isModuleExports(left) && isObjectWithProperties(right)) {
-      component = right;
-    }
-  }
+  const component = getComponentFromNode(node);
 
   if (!component) return;
   if (!astIncludesProperty(propertyName, component.properties)) {
@@ -80,19 +85,7 @@ function getProps(moduleProperties) {
 
 // Do component props contain the right properties? e.g. label, description
 function componentPropsContainsPropertyCheck(context, node, propertyName) {
-  let component;
-  if (isDefaultExport(node) && isObjectWithProperties(node.declaration)) {
-    component = node.declaration;
-  }
-  if (node.expression) {
-    const {
-      left,
-      right,
-    } = node.expression;
-    if (isModuleExports(left) && isObjectWithProperties(right)) {
-      component = right;
-    }
-  }
+  const component = getComponentFromNode(node);
 
   if (!component) return;
 
@@ -119,20 +112,7 @@ function componentPropsContainsPropertyCheck(context, node, propertyName) {
 }
 
 function optionalComponentPropsHaveDefaultProperty(context, node) {
-  let component;
-  if (isDefaultExport(node) && isObjectWithProperties(node.declaration)) {
-    component = node.declaration;
-  }
-
-  if (node.expression) {
-    const {
-      left,
-      right,
-    } = node.expression;
-    if (isModuleExports(left) && isObjectWithProperties(right)) {
-      component = right;
-    }
-  }
+  const component = getComponentFromNode(node);
 
   if (!component) return;
   const { properties } = component;
@@ -166,20 +146,7 @@ function optionalComponentPropsHaveDefaultProperty(context, node) {
 // Checks to confirm the component is a source, and returns
 // the node with the name specified by the user
 function checkComponentIsSourceAndReturnTargetProp(node, propertyName) {
-  let component;
-  if (isDefaultExport(node) && isObjectWithProperties(node.declaration)) {
-    component = node.declaration;
-  }
-
-  if (node.expression) {
-    const {
-      left,
-      right,
-    } = node.expression;
-    if (isModuleExports(left) && isObjectWithProperties(right)) {
-      component = right;
-    }
-  }
+  const component = getComponentFromNode(node);
 
   if (!component) return;
   const { properties } = component;
@@ -215,20 +182,7 @@ function componentSourceDescriptionCheck(context, node) {
 }
 
 function componentVersionTsMacroCheck(context, node) {
-  let component;
-  if (isDefaultExport(node) && isObjectWithProperties(node.declaration)) {
-    component = node.declaration;
-  }
-
-  if (node.expression) {
-    const {
-      left,
-      right,
-    } = node.expression;
-    if (isModuleExports(left) && isObjectWithProperties(right)) {
-      component = right;
-    }
-  }
+  const component = getComponentFromNode(node);
 
   if (!component) return;
   const { properties } = component;
