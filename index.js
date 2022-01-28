@@ -20,6 +20,15 @@ function isObjectWithProperties(node) {
   return true;
 }
 
+// Default interface props don't need labels and descriptions
+function isDefaultInterfaceProperty(propertyName, properties) {
+  if (propertyName === "label" || propertyName === "description") {
+    const interfacePropValue = findPropertyWithName("type", properties).value;
+    return (interfacePropValue.value === "$.interface.timer" || interfacePropValue.value === "$.interface.http");
+  }
+  return false;
+}
+
 function getComponentFromNode(node) {
   if (isDefaultExport(node) && isObjectWithProperties(node.declaration)) {
     return node.declaration;
@@ -102,6 +111,7 @@ function componentPropsContainsPropertyCheck(context, node, propertyName) {
     // We don't want to lint app props or props that are defined in propDefinitions
     if (!isObjectWithProperties(propDef)) continue;
     if (astIncludesProperty("propDefinition", propDef.properties)) continue;
+    if (isDefaultInterfaceProperty(propertyName, propDef.properties)) continue;
     if (!astIncludesProperty(propertyName, propDef.properties)) {
       context.report({
         node: prop,
