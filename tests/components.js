@@ -71,6 +71,30 @@ module.exports = {
       },
     },
   },
+  missingPropsLabelTimer: {
+    key: "test",
+    name: "Test",
+    description: "hello",
+    version: "0.0.1",
+    props: {
+      test: {
+        type: "$.interface.timer",
+        description: "test",
+      },
+    },
+  },
+  missingPropsLabelHttp: {
+    key: "test",
+    name: "Test",
+    description: "hello",
+    version: "0.0.1",
+    props: {
+      test: {
+        type: "$.interface.http",
+        description: "test",
+      },
+    },
+  },
   missingPropsDescription: {
     key: "test",
     name: "Test",
@@ -79,6 +103,30 @@ module.exports = {
     props: {
       test: {
         type: "string",
+        label: "Test",
+      },
+    },
+  },
+  missingPropsDescriptionTimer: {
+    key: "test",
+    name: "Test",
+    description: "hello",
+    version: "0.0.1",
+    props: {
+      test: {
+        type: "$.interface.timer",
+        label: "Test",
+      },
+    },
+  },
+  missingPropsDescriptionHttp: {
+    key: "test",
+    name: "Test",
+    description: "hello",
+    version: "0.0.1",
+    props: {
+      test: {
+        type: "$.interface.http",
         label: "Test",
       },
     },
