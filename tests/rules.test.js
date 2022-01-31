@@ -9,7 +9,11 @@ const {
   requiredPropertyTypeMissing,
   optionalPropWithoutDefaultValue,
   missingPropsLabel,
+  missingPropsLabelTimer,
+  missingPropsLabelHttp,
   missingPropsDescription,
+  missingPropsDescriptionTimer,
+  missingPropsDescriptionHttp,
   badSourceName,
   badSourceDescription,
   tsVersion,
@@ -87,11 +91,25 @@ const componentTestConfigs = [
   },
   {
     ruleName: "props-label",
+    validComponent: missingPropsLabelTimer,
+    invalidComponent: missingPropsLabel,
+    errorMessage: "Component prop test must have a label. See https://pipedream.com/docs/components/guidelines/#props",
+  },
+  {
+    ruleName: "props-label",
+    validComponent: missingPropsLabelHttp,
     invalidComponent: missingPropsLabel,
     errorMessage: "Component prop test must have a label. See https://pipedream.com/docs/components/guidelines/#props",
   },
   {
     ruleName: "props-description",
+    validComponent: missingPropsDescriptionTimer,
+    invalidComponent: missingPropsDescription,
+    errorMessage: "Component prop test must have a description. See https://pipedream.com/docs/components/guidelines/#props",
+  },
+  {
+    ruleName: "props-description",
+    validComponent: missingPropsDescriptionHttp,
     invalidComponent: missingPropsDescription,
     errorMessage: "Component prop test must have a description. See https://pipedream.com/docs/components/guidelines/#props",
   },
@@ -184,4 +202,3 @@ RuleTester.describe("On ESM export default with preceding statements", () => {
     });
   });
 });
-
