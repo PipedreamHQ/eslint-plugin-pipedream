@@ -23,8 +23,8 @@ function isObjectWithProperties(node) {
 // Default interface props don't need labels and descriptions
 function isDefaultInterfaceProperty(propertyName, properties) {
   if (propertyName === "label" || propertyName === "description") {
-    const interfacePropValue = findPropertyWithName("type", properties).value;
-    return (interfacePropValue.value === "$.interface.timer" || interfacePropValue.value === "$.interface.http");
+    const interfacePropValue = findPropertyWithName("type", properties)?.value;
+    return (interfacePropValue?.value === "$.interface.timer" || interfacePropValue?.value === "$.interface.http");
   }
   return false;
 }
