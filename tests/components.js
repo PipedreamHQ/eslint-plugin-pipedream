@@ -95,6 +95,18 @@ module.exports = {
       },
     },
   },
+  missingPropsLabelDir: {
+    key: "test",
+    name: "Test",
+    description: "hello",
+    version: "0.0.1",
+    props: {
+      test: {
+        type: "dir",
+        description: "test",
+      },
+    },
+  },
   missingPropsDescription: {
     key: "test",
     name: "Test",
@@ -127,6 +139,18 @@ module.exports = {
     props: {
       test: {
         type: "$.interface.http",
+        label: "Test",
+      },
+    },
+  },
+  missingPropsDescriptionDir: {
+    key: "test",
+    name: "Test",
+    description: "hello",
+    version: "0.0.1",
+    props: {
+      test: {
+        type: "dir",
         label: "Test",
       },
     },

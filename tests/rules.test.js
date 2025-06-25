@@ -11,9 +11,11 @@ const {
   missingPropsLabel,
   missingPropsLabelTimer,
   missingPropsLabelHttp,
+  missingPropsLabelDir,
   missingPropsDescription,
   missingPropsDescriptionTimer,
   missingPropsDescriptionHttp,
+  missingPropsDescriptionDir,
   badSourceName,
   badSourceDescription,
   tsVersion,
@@ -45,14 +47,16 @@ function withPrecedingStatement(code) {
 function makeComponentTestCase ({
   ruleName,
   name = `${ruleName}-test`,
-  validComponent = valid,
+  validComponents = [
+    valid,
+  ],
   invalidComponent,
   errorMessage,
 }) {
   return {
     name,
     ruleName,
-    validComponent,
+    validComponents,
     invalidComponent,
     errorMessage,
   };
@@ -91,25 +95,21 @@ const componentTestConfigs = [
   },
   {
     ruleName: "props-label",
-    validComponent: missingPropsLabelTimer,
-    invalidComponent: missingPropsLabel,
-    errorMessage: "Component prop test must have a label. See https://pipedream.com/docs/components/guidelines/#props",
-  },
-  {
-    ruleName: "props-label",
-    validComponent: missingPropsLabelHttp,
+    validComponents: [
+      missingPropsLabelTimer,
+      missingPropsLabelHttp,
+      missingPropsLabelDir,
+    ],
     invalidComponent: missingPropsLabel,
     errorMessage: "Component prop test must have a label. See https://pipedream.com/docs/components/guidelines/#props",
   },
   {
     ruleName: "props-description",
-    validComponent: missingPropsDescriptionTimer,
-    invalidComponent: missingPropsDescription,
-    errorMessage: "Component prop test must have a description. See https://pipedream.com/docs/components/guidelines/#props",
-  },
-  {
-    ruleName: "props-description",
-    validComponent: missingPropsDescriptionHttp,
+    validComponents: [
+      missingPropsDescriptionTimer,
+      missingPropsDescriptionHttp,
+      missingPropsDescriptionDir,
+    ],
     invalidComponent: missingPropsDescription,
     errorMessage: "Component prop test must have a description. See https://pipedream.com/docs/components/guidelines/#props",
   },
@@ -138,19 +138,19 @@ componentTestCases.forEach((testCase) => {
   const {
     name,
     ruleName,
-    validComponent,
+    validComponents,
     invalidComponent,
     errorMessage,
   } = testCase;
   ruleTester.run(name, rules[ruleName], {
-    valid: [
+    valid: validComponents.map((component) => ([
       {
-        code: convertObjectToCJSExportString(validComponent),
+        code: convertObjectToCJSExportString(component),
       },
       {
-        code: convertObjectToESMExportString(validComponent),
+        code: convertObjectToESMExportString(component),
       },
-    ],
+    ])).flat(),
     invalid: [
       {
         code: convertObjectToCJSExportString(invalidComponent),
