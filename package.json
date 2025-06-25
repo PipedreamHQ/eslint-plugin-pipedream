@@ -1,5 +1,5 @@
 {
-  "name": "eslint-plugin-pipedream",
+  "name": "@pipedream/eslint-plugin-pipedream",
   "version": "0.2.4",
   "description": "ESLint plugin for Pipedream components: https://pipedream.com/docs/components/api/",
   "main": "index.js",
