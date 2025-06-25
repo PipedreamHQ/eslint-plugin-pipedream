@@ -15,7 +15,7 @@ We will gladly accept issues and PRs in this repo.
 In the repo where you manage Pipedream components, run:
 
 ```bash
-npm install eslint-plugin-pipedream --save-dev
+npm install @pipedream/eslint-plugin-pipedream --save-dev
 ```
 
 Then add the Pipedream plugin to the `plugins` section of your [ESLint config file](https://eslint.org/docs/user-guide/configuring/):
