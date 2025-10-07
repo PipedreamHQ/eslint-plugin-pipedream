@@ -19,6 +19,10 @@ const {
   badSourceName,
   badSourceDescription,
   tsVersion,
+  validActionWithAnnotations,
+  actionMissingAnnotations,
+  actionMissingAnnotationKey,
+  actionInvalidAnnotations,
 } = require("./components");
 
 const ruleTester = new RuleTester({
@@ -128,6 +132,33 @@ const componentTestConfigs = [
     ruleName: "no-ts-version",
     invalidComponent: tsVersion,
     errorMessage: "{{ts}} macro should be removed before committing",
+  },
+  {
+    name: "action-annotations-missing",
+    ruleName: "action-annotations",
+    validComponents: [
+      validActionWithAnnotations,
+    ],
+    invalidComponent: actionMissingAnnotations,
+    errorMessage: "Action component is missing required 'annotations' object",
+  },
+  {
+    name: "action-annotations-missing-key",
+    ruleName: "action-annotations",
+    validComponents: [
+      validActionWithAnnotations,
+    ],
+    invalidComponent: actionMissingAnnotationKey,
+    errorMessage: "Property 'annotations' is missing required key: 'readOnlyHint'",
+  },
+  {
+    name: "action-annotations-invalid",
+    ruleName: "action-annotations",
+    validComponents: [
+      validActionWithAnnotations,
+    ],
+    invalidComponent: actionInvalidAnnotations,
+    errorMessage: "Property 'annotations' must be an object expression",
   },
 ];
 

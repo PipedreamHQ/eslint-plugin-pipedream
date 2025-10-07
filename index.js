@@ -211,6 +211,56 @@ function componentVersionTsMacroCheck(context, node) {
   }
 }
 
+function componentActionAnnotationsCheck(context, node) {
+  const component = getComponentFromNode(node);
+
+  if (!component) return;
+  const { properties } = component;
+
+  const typeProp = findPropertyWithName("type", properties);
+  if (typeProp?.value?.value !== "action") return;
+
+  const annotationsProp = findPropertyWithName("annotations", properties);
+
+  // Error 1 - annotations missing entirely
+  if (!annotationsProp) {
+    context.report({
+      node: component,
+      message: "Action component is missing required 'annotations' object",
+    });
+    return;
+  }
+
+  // Error 2 - annotations is not an object expression
+  if (annotationsProp.value.type !== "ObjectExpression") {
+    context.report({
+      node: annotationsProp.value,
+      message: "Property 'annotations' must be an object expression",
+    });
+    return;
+  }
+
+  // Error 3 - required keys missing
+  const requiredKeys = [
+    "destructiveHint",
+    "openWorldHint",
+    "readOnlyHint",
+  ];
+
+  const annotationKeys = annotationsProp.value.properties.map(
+    (prop) => prop.key && (prop.key.name || prop.key.value)
+  );
+
+  for (const requiredKey of requiredKeys) {
+    if (!annotationKeys.includes(requiredKey)) {
+      context.report({
+        node: annotationsProp.value,
+        message: `Property 'annotations' is missing required key: '${requiredKey}'`,
+      });
+    }
+  }
+}
+
 // Rules run on two different AST node types: ExpressionStatement (CJS) and
 // ExportDefaultDeclaration (ESM)
 module.exports = {
@@ -343,6 +393,18 @@ module.exports = {
           },
           ExportDefaultDeclaration(node) {
             componentVersionTsMacroCheck(context, node);
+          },
+        };
+      },
+    },
+    "action-annotations": {
+      create: function (context) {
+        return {
+          ExpressionStatement(node) {
+            componentActionAnnotationsCheck(context, node);
+          },
+          ExportDefaultDeclaration(node) {
+            componentActionAnnotationsCheck(context, node);
           },
         };
       },
