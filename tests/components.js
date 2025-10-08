@@ -174,4 +174,42 @@ module.exports = {
     type: "action",
     version: "0.0.{{ts}}",
   },
+  validActionWithAnnotations: {
+    key: "test",
+    name: "Test",
+    description: "foo",
+    type: "action",
+    version: "0.0.1",
+    annotations: {
+      destructiveHint: false,
+      openWorldHint: false,
+      readOnlyHint: true,
+    },
+  },
+  actionMissingAnnotations: {
+    key: "test",
+    name: "Test",
+    description: "foo",
+    type: "action",
+    version: "0.0.1",
+  },
+  actionMissingAnnotationKey: {
+    key: "test",
+    name: "Test",
+    description: "foo",
+    type: "action",
+    version: "0.0.1",
+    annotations: {
+      destructiveHint: false,
+      openWorldHint: false,
+    },
+  },
+  actionInvalidAnnotations: {
+    key: "test",
+    name: "Test",
+    description: "foo",
+    type: "action",
+    version: "0.0.1",
+    annotations: "invalid",
+  },
 };
