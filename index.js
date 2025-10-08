@@ -247,12 +247,8 @@ function componentActionAnnotationsCheck(context, node) {
     "readOnlyHint",
   ];
 
-  const annotationKeys = annotationsProp.value.properties.map(
-    (prop) => prop.key && (prop.key.name || prop.key.value)
-  );
-
   for (const requiredKey of requiredKeys) {
-    if (!annotationKeys.includes(requiredKey)) {
+    if (!astIncludesProperty(requiredKey, annotationsProp.value.properties)) {
       context.report({
         node: annotationsProp.value,
         message: `Property 'annotations' is missing required key: '${requiredKey}'`,
