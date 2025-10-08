@@ -248,7 +248,7 @@ function componentActionAnnotationsCheck(context, node) {
   ];
 
   const annotationKeys = annotationsProp.value.properties.map(
-    (prop) => prop.key && (prop.key.name || prop.key.value)
+    (prop) => prop.key && (prop.key.name || prop.key.value),
   );
 
   for (const requiredKey of requiredKeys) {
